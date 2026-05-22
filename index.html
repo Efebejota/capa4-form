@@ -599,7 +599,7 @@ document.getElementById('escalation-form').addEventListener('submit', async (e) 
     await fetch(webhookUrl, {
       method:  'POST',
       mode:    'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body:    JSON.stringify(payload),
     });
     document.getElementById('form-view').style.display = 'none';
