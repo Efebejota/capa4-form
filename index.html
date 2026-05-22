@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Escalada Capa 4 / Layer 4 Escalation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         #0f1117;
+      --surface:    #181c27;
+      --border:     #2a2f42;
+      --border-hover: #3d4460;
+      --accent:     #e8501a;
+      --accent-dim: rgba(232,80,26,0.15);
+      --text:       #e2e6f0;
+      --text-muted: #7b849a;
+      --label:      #a0a8bc;
+      --input-bg:   #12151e;
+      --success:    #2ecc71;
+      --radius:     6px;
+      --font:       'IBM Plex Sans', sans-serif;
+      --mono:       'IBM Plex Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px 60px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(232,80,26,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,80,26,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 640px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── HEADER ── */
+    .header { margin-bottom: 32px; }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .header-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── BANNER (ticket + técnico) ── */
+    .ticket-banner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 28px;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+    .banner-cell {
+      background: var(--surface);
+      padding: 12px 16px;
+    }
+    .banner-label {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+    .banner-value {
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .banner-value.tech {
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* ── FORM CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+
+    .field { margin-bottom: 20px; }
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--label);
+      margin-bottom: 6px;
+    }
+    label .req { color: var(--accent); margin-left: 3px; }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      resize: vertical;
+    }
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    input.error, textarea.error {
+      border-color: #e74c3c;
+      box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
+    }
+    textarea { min-height: 90px; }
+    textarea.tall { min-height: 110px; }
+
+    .hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+    .field-error {
+      font-size: 12px;
+      color: #e74c3c;
+      margin-top: 5px;
+      display: none;
+    }
+    .field-error.visible { display: block; }
+
+    /* ── SUBMIT ── */
+    .submit-area { margin-top: 24px; }
+
+    button[type="submit"] {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 13px 24px;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button[type="submit"]:hover  { background: #d04415; }
+    button[type="submit"]:active { transform: scale(0.99); }
+    button[type="submit"]:disabled {
+      background: #4a2d22;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    /* ── STATES ── */
+    .state-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .state-overlay.active { display: flex; }
+
+    .icon-circle {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    .icon-circle.success { background: rgba(46,204,113,0.15); }
+    .icon-circle.error   { background: rgba(231,76,60,0.15); }
+
+    .state-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+    .state-msg   { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- FORM VIEW -->
+  <div id="form-view">
+    <div class="header">
+      <div class="header-badge" id="badge-text">Escalada Capa 4</div>
+      <h1 id="main-title">Información para escalada a Capa 4</h1>
+      <p class="subtitle" id="main-subtitle">
+        Rellena todos los campos antes de que se notifique al equipo de soporte avanzado.
+      </p>
+    </div>
+
+    <!-- BANNER: ticket + técnico -->
+    <div class="ticket-banner">
+      <div class="banner-cell">
+        <div class="banner-label" id="ticket-label-text">Ticket</div>
+        <div class="banner-value" id="ticket-display">#—</div>
+      </div>
+      <div class="banner-cell">
+        <div class="banner-label" id="tech-label-text">Técnico MP</div>
+        <div class="banner-value tech" id="tech-display">—</div>
+      </div>
+    </div>
+
+    <form id="escalation-form" novalidate>
+
+      <!-- SECCIÓN 1: Datos del caso -->
+      <div class="card">
+        <div class="section-title" id="sec1-title">01 — Datos del caso</div>
+        <div class="field">
+          <label for="order_number" id="lbl-order">Nº de pedido / instalación <span class="req">*</span></label>
+          <input type="text" id="order_number" name="order_number" autocomplete="off" />
+          <div class="field-error" id="err-order"></div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: Datos del cliente -->
+      <div class="card">
+        <div class="section-title" id="sec2-title">02 — Datos del cliente</div>
+
+        <div class="field">
+          <label for="client_name" id="lbl-client-name">Nombre del cliente <span class="req">*</span></label>
+          <input type="text" id="client_name" name="client_name" autocomplete="off" />
+          <div class="field-error" id="err-client-name"></div>
+        </div>
+
+        <div class="field">
+          <label for="client_contact" id="lbl-contact">Teléfono / Email <span class="req">*</span></label>
+          <input type="text" id="client_contact" name="client_contact" autocomplete="off" />
+          <div class="hint" id="hint-contact"></div>
+          <div class="field-error" id="err-contact"></div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3: Descripción técnica -->
+      <div class="card">
+        <div class="section-title" id="sec3-title">03 — Descripción técnica</div>
+
+        <div class="field">
+          <label for="symptoms" id="lbl-symptoms">Síntomas y descripción del problema <span class="req">*</span></label>
+          <textarea class="tall" id="symptoms" name="symptoms"></textarea>
+          <div class="field-error" id="err-symptoms"></div>
+        </div>
+
+        <div class="field">
+          <label for="attempted" id="lbl-attempted">Qué se ha intentado para solucionar <span class="req">*</span></label>
+          <textarea id="attempted" name="attempted"></textarea>
+          <div class="field-error" id="err-attempted"></div>
+        </div>
+
+        <div class="field">
+          <label for="pending" id="lbl-pending">Qué queda por resolver (concretamente) <span class="req">*</span></label>
+          <textarea id="pending" name="pending"></textarea>
+          <div class="field-error" id="err-pending"></div>
+        </div>
+      </div>
+
+      <div class="submit-area">
+        <button type="submit" id="submit-btn">
+          <span id="submit-label">Escalar Ticket</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="state-overlay" id="success-view">
+    <div class="icon-circle success">✓</div>
+    <div class="state-title" id="success-title">Información enviada</div>
+    <p class="state-msg" id="success-msg">El equipo de soporte avanzado ha sido notificado. Puedes cerrar esta ventana.</p>
+  </div>
+
+  <!-- ERROR -->
+  <div class="state-overlay" id="error-view">
+    <div class="icon-circle error">!</div>
+    <div class="state-title" id="error-title">Error al enviar</div>
+    <p class="state-msg" id="error-msg">No se han podido enviar los datos. Intenta de nuevo o contacta con el administrador.</p>
+  </div>
+
+</div>
+
+<script>
+// ── TRANSLATIONS ──────────────────────────────────────────────
+const i18n = {
+  es: {
+    badge:         'Escalada Capa 4',
+    title:         'Información para escalada a Capa 4',
+    subtitle:      'Rellena todos los campos antes de que se notifique al equipo de soporte avanzado.',
+    ticketLabel:   'Ticket',
+    techLabel:     'Técnico MP',
+    sec1:          '01 — Datos del caso',
+    sec2:          '02 — Datos del cliente',
+    sec3:          '03 — Descripción técnica',
+    lblOrder:      'Nº de pedido / instalación',
+    lblClientName: 'Nombre del cliente',
+    lblContact:    'Teléfono / Email',
+    hintContact:   'Introduce teléfono, correo o ambos',
+    lblSymptoms:   'Síntomas y descripción del problema',
+    lblAttempted:  'Qué se ha intentado para solucionar',
+    lblPending:    'Qué queda por resolver (concretamente)',
+    submit:        'Escalar Ticket',
+    sending:       'Enviando...',
+    errRequired:   'Este campo es obligatorio.',
+    successTitle:  'Escalada enviada',
+    successMsg:    'El equipo de soporte avanzado ha sido notificado. Puedes cerrar esta ventana.',
+    errorTitle:    'Error al enviar',
+    errorMsg:      'No se han podido enviar los datos. Intenta de nuevo o contacta con el administrador.',
+  },
+  en: {
+    badge:         'Layer 4 Escalation',
+    title:         'Layer 4 Escalation – Required Information',
+    subtitle:      'Fill in all fields before the advanced support team is notified.',
+    ticketLabel:   'Ticket',
+    techLabel:     'MP Technician',
+    sec1:          '01 — Case details',
+    sec2:          '02 — Customer details',
+    sec3:          '03 — Technical description',
+    lblOrder:      'Order / installation number',
+    lblClientName: 'Customer name',
+    lblContact:    'Phone / Email',
+    hintContact:   'Enter phone, email or both',
+    lblSymptoms:   'Symptoms and problem description',
+    lblAttempted:  'What has been attempted to resolve the issue',
+    lblPending:    'What remains to be resolved (specifically)',
+    submit:        'Escalate Ticket',
+    sending:       'Sending...',
+    errRequired:   'This field is required.',
+    successTitle:  'Escalation submitted',
+    successMsg:    'The advanced support team has been notified. You can close this window.',
+    errorTitle:    'Submission error',
+    errorMsg:      'Could not send the data. Please try again or contact the administrator.',
+  },
+  fr: {
+    badge:         'Escalade Couche 4',
+    title:         'Informations pour l\'escalade en Couche 4',
+    subtitle:      'Remplissez tous les champs avant que l\'équipe de support avancé soit notifiée.',
+    ticketLabel:   'Ticket',
+    techLabel:     'Technicien MP',
+    sec1:          '01 — Détails du dossier',
+    sec2:          '02 — Données du client',
+    sec3:          '03 — Description technique',
+    lblOrder:      'N° de commande / installation',
+    lblClientName: 'Nom du client',
+    lblContact:    'Téléphone / E-mail',
+    hintContact:   'Entrez téléphone, e-mail ou les deux',
+    lblSymptoms:   'Symptômes et description du problème',
+    lblAttempted:  'Ce qui a été tenté pour résoudre le problème',
+    lblPending:    'Ce qui reste à résoudre (concrètement)',
+    submit:        'Escalader le ticket',
+    sending:       'Envoi en cours...',
+    errRequired:   'Ce champ est obligatoire.',
+    successTitle:  'Escalade envoyée',
+    successMsg:    'L\'équipe de support avancé a été notifiée. Vous pouvez fermer cette fenêtre.',
+    errorTitle:    'Erreur d\'envoi',
+    errorMsg:      'Impossible d\'envoyer les données. Réessayez ou contactez l\'administrateur.',
+  },
+  de: {
+    badge:         'Eskalation Ebene 4',
+    title:         'Informationen zur Eskalation auf Ebene 4',
+    subtitle:      'Füllen Sie alle Felder aus, bevor das erweiterte Support-Team benachrichtigt wird.',
+    ticketLabel:   'Ticket',
+    techLabel:     'MP-Techniker',
+    sec1:          '01 — Falldaten',
+    sec2:          '02 — Kundendaten',
+    sec3:          '03 — Technische Beschreibung',
+    lblOrder:      'Bestell- / Installationsnummer',
+    lblClientName: 'Kundenname',
+    lblContact:    'Telefon / E-Mail',
+    hintContact:   'Telefon, E-Mail oder beides eingeben',
+    lblSymptoms:   'Symptome und Problembeschreibung',
+    lblAttempted:  'Was zur Behebung versucht wurde',
+    lblPending:    'Was noch konkret zu lösen ist',
+    submit:        'Ticket eskalieren',
+    sending:       'Sende...',
+    errRequired:   'Dieses Feld ist erforderlich.',
+    successTitle:  'Eskalation gesendet',
+    successMsg:    'Das erweiterte Support-Team wurde benachrichtigt. Sie können dieses Fenster schließen.',
+    errorTitle:    'Sendefehler',
+    errorMsg:      'Die Daten konnten nicht gesendet werden. Versuchen Sie es erneut oder kontaktieren Sie den Administrator.',
+  }
+};
+
+// ── INIT ──────────────────────────────────────────────────────
+const params       = new URLSearchParams(window.location.search);
+const ticketId     = params.get('ticket_id')   || '—';
+const techName     = params.get('technician')  || '—';
+const rawLang      = (params.get('lang') || 'es').toLowerCase();
+const lang         = i18n[rawLang] ? rawLang : 'es';
+const t            = i18n[lang];
+
+// IMPORTANT: replace with the real Make webhook URL
+const webhookUrl = params.get('webhook') || 'https://hook.eu2.make.com/REPLACE_WITH_REAL_URL';
+
+// Apply translations
+document.documentElement.lang = lang;
+document.getElementById('badge-text').textContent       = t.badge;
+document.getElementById('main-title').textContent       = t.title;
+document.getElementById('main-subtitle').textContent    = t.subtitle;
+document.getElementById('ticket-label-text').textContent = t.ticketLabel;
+document.getElementById('ticket-display').textContent   = '#' + ticketId;
+document.getElementById('tech-label-text').textContent  = t.techLabel;
+document.getElementById('tech-display').textContent     = techName;
+document.getElementById('sec1-title').textContent       = t.sec1;
+document.getElementById('sec2-title').textContent       = t.sec2;
+document.getElementById('sec3-title').textContent       = t.sec3;
+document.getElementById('lbl-order').innerHTML          = t.lblOrder      + ' <span class="req">*</span>';
+document.getElementById('lbl-client-name').innerHTML    = t.lblClientName + ' <span class="req">*</span>';
+document.getElementById('lbl-contact').innerHTML        = t.lblContact    + ' <span class="req">*</span>';
+document.getElementById('hint-contact').textContent     = t.hintContact;
+document.getElementById('lbl-symptoms').innerHTML       = t.lblSymptoms   + ' <span class="req">*</span>';
+document.getElementById('lbl-attempted').innerHTML      = t.lblAttempted  + ' <span class="req">*</span>';
+document.getElementById('lbl-pending').innerHTML        = t.lblPending    + ' <span class="req">*</span>';
+document.getElementById('submit-label').textContent     = t.submit;
+document.getElementById('success-title').textContent    = t.successTitle;
+document.getElementById('success-msg').textContent      = t.successMsg;
+document.getElementById('error-title').textContent      = t.errorTitle;
+document.getElementById('error-msg').textContent        = t.errorMsg;
+
+// ── VALIDATION ────────────────────────────────────────────────
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+function clearError(id) {
+  document.getElementById(id).classList.remove('visible');
+}
+function markField(inputId, hasError) {
+  const el = document.getElementById(inputId);
+  if (hasError) el.classList.add('error');
+  else          el.classList.remove('error');
+}
+
+function validate() {
+  let valid = true;
+  const fields = [
+    { id: 'order_number',  err: 'err-order'       },
+    { id: 'client_name',   err: 'err-client-name' },
+    { id: 'client_contact',err: 'err-contact'     },
+    { id: 'symptoms',      err: 'err-symptoms'    },
+    { id: 'attempted',     err: 'err-attempted'   },
+    { id: 'pending',       err: 'err-pending'     },
+  ];
+
+  fields.forEach(f => {
+    const val = document.getElementById(f.id).value.trim();
+    if (!val) {
+      showError(f.err, t.errRequired);
+      markField(f.id, true);
+      valid = false;
+    } else {
+      clearError(f.err);
+      markField(f.id, false);
+    }
+  });
+
+  return valid;
+}
+
+// Clear errors on input
+['order_number','client_name','client_contact','symptoms','attempted','pending']
+  .forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      const errMap = {
+        order_number:   'err-order',
+        client_name:    'err-client-name',
+        client_contact: 'err-contact',
+        symptoms:       'err-symptoms',
+        attempted:      'err-attempted',
+        pending:        'err-pending',
+      };
+      clearError(errMap[id]);
+      markField(id, false);
+    });
+  });
+
+// ── SUBMIT ────────────────────────────────────────────────────
+document.getElementById('escalation-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!validate()) return;
+
+  const btn   = document.getElementById('submit-btn');
+  const label = document.getElementById('submit-label');
+  btn.disabled = true;
+  label.textContent = t.sending;
+  btn.insertAdjacentHTML('beforeend', '<div class="spinner"></div>');
+
+  const payload = {
+    ticket_id:      ticketId,
+    technician:     techName,
+    lang:           lang,
+    order_number:   document.getElementById('order_number').value.trim(),
+    client_name:    document.getElementById('client_name').value.trim(),
+    client_contact: document.getElementById('client_contact').value.trim(),
+    symptoms:       document.getElementById('symptoms').value.trim(),
+    attempted:      document.getElementById('attempted').value.trim(),
+    pending:        document.getElementById('pending').value.trim(),
+  };
+
+  try {
+    const res = await fetch(webhookUrl, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    document.getElementById('form-view').style.display = 'none';
+    document.getElementById('success-view').classList.add('active');
+  } catch (err) {
+    document.getElementById('form-view').style.display = 'none';
+    document.getElementById('error-view').classList.add('active');
+  }
+});
+</script>
+</body>
+</html>
