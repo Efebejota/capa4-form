@@ -23,9 +23,7 @@
       --font:       'IBM Plex Sans', sans-serif;
       --mono:       'IBM Plex Mono', monospace;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -37,7 +35,6 @@
       justify-content: center;
       padding: 40px 16px 60px;
     }
-
     body::before {
       content: '';
       position: fixed;
@@ -49,17 +46,14 @@
       pointer-events: none;
       z-index: 0;
     }
-
     .wrapper {
       width: 100%;
       max-width: 640px;
       position: relative;
       z-index: 1;
     }
-
     /* ── HEADER ── */
     .header { margin-bottom: 32px; }
-
     .header-badge {
       display: inline-flex;
       align-items: center;
@@ -86,7 +80,6 @@
       0%, 100% { opacity: 1; transform: scale(1); }
       50%       { opacity: 0.4; transform: scale(0.7); }
     }
-
     h1 {
       font-size: 24px;
       font-weight: 600;
@@ -99,7 +92,6 @@
       font-size: 14px;
       line-height: 1.5;
     }
-
     /* ── BANNER (ticket + técnico) ── */
     .ticket-banner {
       display: grid;
@@ -135,7 +127,6 @@
       font-size: 14px;
       font-weight: 600;
     }
-
     /* ── FORM CARD ── */
     .card {
       background: var(--surface);
@@ -144,7 +135,6 @@
       padding: 28px;
       margin-bottom: 16px;
     }
-
     .section-title {
       font-family: var(--mono);
       font-size: 11px;
@@ -155,10 +145,8 @@
       padding-bottom: 8px;
       margin-bottom: 20px;
     }
-
     .field { margin-bottom: 20px; }
     .field:last-child { margin-bottom: 0; }
-
     label {
       display: block;
       font-size: 13px;
@@ -167,7 +155,6 @@
       margin-bottom: 6px;
     }
     label .req { color: var(--accent); margin-left: 3px; }
-
     input[type="text"],
     textarea {
       width: 100%;
@@ -194,7 +181,6 @@
     }
     textarea { min-height: 90px; }
     textarea.tall { min-height: 110px; }
-
     .hint {
       font-size: 12px;
       color: var(--text-muted);
@@ -207,10 +193,8 @@
       display: none;
     }
     .field-error.visible { display: block; }
-
     /* ── SUBMIT ── */
     .submit-area { margin-top: 24px; }
-
     button[type="submit"] {
       width: 100%;
       background: var(--accent);
@@ -235,7 +219,6 @@
       cursor: not-allowed;
       opacity: 0.7;
     }
-
     /* ── STATES ── */
     .state-overlay {
       display: none;
@@ -249,7 +232,6 @@
       border-radius: 8px;
     }
     .state-overlay.active { display: flex; }
-
     .icon-circle {
       width: 64px; height: 64px;
       border-radius: 50%;
@@ -261,10 +243,8 @@
     }
     .icon-circle.success { background: rgba(46,204,113,0.15); }
     .icon-circle.error   { background: rgba(231,76,60,0.15); }
-
     .state-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
     .state-msg   { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
-
     .spinner {
       width: 20px; height: 20px;
       border: 2px solid rgba(255,255,255,0.3);
@@ -277,7 +257,6 @@
 </head>
 <body>
 <div class="wrapper">
-
   <!-- FORM VIEW -->
   <div id="form-view">
     <div class="header">
@@ -287,7 +266,6 @@
         Rellena todos los campos antes de que se notifique al equipo de soporte avanzado.
       </p>
     </div>
-
     <!-- BANNER: ticket + técnico -->
     <div class="ticket-banner">
       <div class="banner-cell">
@@ -299,9 +277,7 @@
         <div class="banner-value tech" id="tech-display">—</div>
       </div>
     </div>
-
     <form id="escalation-form" novalidate>
-
       <!-- SECCIÓN 1: Datos del caso -->
       <div class="card">
         <div class="section-title" id="sec1-title">01 — Datos del caso</div>
@@ -311,17 +287,14 @@
           <div class="field-error" id="err-order"></div>
         </div>
       </div>
-
       <!-- SECCIÓN 2: Datos del cliente -->
       <div class="card">
         <div class="section-title" id="sec2-title">02 — Datos del cliente</div>
-
         <div class="field">
           <label for="client_name" id="lbl-client-name">Nombre del cliente <span class="req">*</span></label>
           <input type="text" id="client_name" name="client_name" autocomplete="off" />
           <div class="field-error" id="err-client-name"></div>
         </div>
-
         <div class="field">
           <label for="client_contact" id="lbl-contact">Teléfono / Email <span class="req">*</span></label>
           <input type="text" id="client_contact" name="client_contact" autocomplete="off" />
@@ -329,30 +302,25 @@
           <div class="field-error" id="err-contact"></div>
         </div>
       </div>
-
       <!-- SECCIÓN 3: Descripción técnica -->
       <div class="card">
         <div class="section-title" id="sec3-title">03 — Descripción técnica</div>
-
         <div class="field">
           <label for="symptoms" id="lbl-symptoms">Síntomas y descripción del problema <span class="req">*</span></label>
           <textarea class="tall" id="symptoms" name="symptoms"></textarea>
           <div class="field-error" id="err-symptoms"></div>
         </div>
-
         <div class="field">
           <label for="attempted" id="lbl-attempted">Qué se ha intentado para solucionar <span class="req">*</span></label>
           <textarea id="attempted" name="attempted"></textarea>
           <div class="field-error" id="err-attempted"></div>
         </div>
-
         <div class="field">
           <label for="pending" id="lbl-pending">Qué queda por resolver (concretamente) <span class="req">*</span></label>
           <textarea id="pending" name="pending"></textarea>
           <div class="field-error" id="err-pending"></div>
         </div>
       </div>
-
       <div class="submit-area">
         <button type="submit" id="submit-btn">
           <span id="submit-label">Escalar Ticket</span>
@@ -360,23 +328,19 @@
       </div>
     </form>
   </div>
-
   <!-- SUCCESS -->
   <div class="state-overlay" id="success-view">
     <div class="icon-circle success">✓</div>
     <div class="state-title" id="success-title">Información enviada</div>
     <p class="state-msg" id="success-msg">El equipo de soporte avanzado ha sido notificado. Puedes cerrar esta ventana.</p>
   </div>
-
   <!-- ERROR -->
   <div class="state-overlay" id="error-view">
     <div class="icon-circle error">!</div>
     <div class="state-title" id="error-title">Error al enviar</div>
     <p class="state-msg" id="error-msg">No se han podido enviar los datos. Intenta de nuevo o contacta con el administrador.</p>
   </div>
-
 </div>
-
 <script>
 // ── TRANSLATIONS ──────────────────────────────────────────────
 const i18n = {
@@ -477,7 +441,6 @@ const i18n = {
     errorMsg:      'Die Daten konnten nicht gesendet werden. Versuchen Sie es erneut oder kontaktieren Sie den Administrator.',
   }
 };
-
 // ── INIT ──────────────────────────────────────────────────────
 const params       = new URLSearchParams(window.location.search);
 const ticketId     = params.get('ticket_id')   || '—';
@@ -485,10 +448,8 @@ const techName     = params.get('technician')  || '—';
 const rawLang      = (params.get('lang') || 'es').toLowerCase();
 const lang         = i18n[rawLang] ? rawLang : 'es';
 const t            = i18n[lang];
-
-// IMPORTANT: replace with the real Make webhook URL
-const webhookUrl = params.get('webhook') || 'https://hook.eu2.make.com/y9l131vv212wbeypwyc5wd2f6gnv8vrs';
-
+// URL de producción del Flujo 2 en n8n (Webhook, path "capa4-formulario")
+const webhookUrl = params.get('webhook') || 'https://mpascensores.app.n8n.cloud/webhook/capa4-formulario';
 // Apply translations
 document.documentElement.lang = lang;
 document.getElementById('badge-text').textContent       = t.badge;
@@ -513,7 +474,6 @@ document.getElementById('success-title').textContent    = t.successTitle;
 document.getElementById('success-msg').textContent      = t.successMsg;
 document.getElementById('error-title').textContent      = t.errorTitle;
 document.getElementById('error-msg').textContent        = t.errorMsg;
-
 // ── VALIDATION ────────────────────────────────────────────────
 function showError(id, msg) {
   const el = document.getElementById(id);
@@ -528,7 +488,6 @@ function markField(inputId, hasError) {
   if (hasError) el.classList.add('error');
   else          el.classList.remove('error');
 }
-
 function validate() {
   let valid = true;
   const fields = [
@@ -539,7 +498,6 @@ function validate() {
     { id: 'attempted',     err: 'err-attempted'   },
     { id: 'pending',       err: 'err-pending'     },
   ];
-
   fields.forEach(f => {
     const val = document.getElementById(f.id).value.trim();
     if (!val) {
@@ -551,10 +509,8 @@ function validate() {
       markField(f.id, false);
     }
   });
-
   return valid;
 }
-
 // Clear errors on input
 ['order_number','client_name','client_contact','symptoms','attempted','pending']
   .forEach(id => {
@@ -571,18 +527,15 @@ function validate() {
       markField(id, false);
     });
   });
-
 // ── SUBMIT ────────────────────────────────────────────────────
 document.getElementById('escalation-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!validate()) return;
-
   const btn   = document.getElementById('submit-btn');
   const label = document.getElementById('submit-label');
   btn.disabled = true;
   label.textContent = t.sending;
   btn.insertAdjacentHTML('beforeend', '<div class="spinner"></div>');
-
   const payload = {
     ticket_id:      ticketId,
     technician:     techName,
@@ -594,7 +547,6 @@ document.getElementById('escalation-form').addEventListener('submit', async (e) 
     attempted:      document.getElementById('attempted').value.trim(),
     pending:        document.getElementById('pending').value.trim(),
   };
-
   try {
     const qs = new URLSearchParams(payload).toString();
     await fetch(webhookUrl + '?' + qs, {
