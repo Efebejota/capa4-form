@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Escalada Capa 4 / Layer 4 Escalation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -155,8 +155,10 @@
       margin-bottom: 6px;
     }
     label .req { color: var(--accent); margin-left: 3px; }
+    label .opt { color: var(--text-muted); font-weight: 400; margin-left: 4px; }
     input[type="text"],
-    textarea {
+    textarea,
+    select {
       width: 100%;
       background: var(--input-bg);
       border: 1px solid var(--border);
@@ -170,12 +172,25 @@
       outline: none;
       resize: vertical;
     }
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      padding-right: 36px;
+      background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+                        linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+      background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+    select option { background: var(--surface); color: var(--text); }
     input[type="text"]:focus,
-    textarea:focus {
+    textarea:focus,
+    select:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-dim);
     }
-    input.error, textarea.error {
+    input.error, textarea.error, select.error {
       border-color: #e74c3c;
       box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
     }
@@ -262,9 +277,7 @@
     <div class="header">
       <div class="header-badge" id="badge-text">Escalada Capa 4</div>
       <h1 id="main-title">Información para escalada a Capa 4</h1>
-      <p class="subtitle" id="main-subtitle">
-        Rellena todos los campos antes de que se notifique al equipo de soporte avanzado.
-      </p>
+      <p class="subtitle" id="main-subtitle">Rellena todos los campos antes de que se notifique al equipo de soporte avanzado.</p>
     </div>
     <!-- BANNER: ticket + técnico -->
     <div class="ticket-banner">
@@ -283,7 +296,7 @@
         <div class="section-title" id="sec1-title">01 — Datos del caso</div>
         <div class="field">
           <label for="order_number" id="lbl-order">Nº de pedido / instalación <span class="req">*</span></label>
-          <input type="text" id="order_number" name="order_number" autocomplete="off" />
+          <input type="text" id="order_number" name="order_number" autocomplete="off">
           <div class="field-error" id="err-order"></div>
         </div>
       </div>
@@ -292,19 +305,44 @@
         <div class="section-title" id="sec2-title">02 — Datos del cliente</div>
         <div class="field">
           <label for="client_name" id="lbl-client-name">Nombre del cliente <span class="req">*</span></label>
-          <input type="text" id="client_name" name="client_name" autocomplete="off" />
+          <input type="text" id="client_name" name="client_name" autocomplete="off">
           <div class="field-error" id="err-client-name"></div>
         </div>
         <div class="field">
           <label for="client_contact" id="lbl-contact">Teléfono / Email <span class="req">*</span></label>
-          <input type="text" id="client_contact" name="client_contact" autocomplete="off" />
-          <div class="hint" id="hint-contact"></div>
+          <input type="text" id="client_contact" name="client_contact" autocomplete="off">
+          <div class="hint" id="hint-contact">Introduce teléfono, correo o ambos</div>
           <div class="field-error" id="err-contact"></div>
         </div>
       </div>
-      <!-- SECCIÓN 3: Descripción técnica -->
+      <!-- SECCIÓN 3: Clasificación (alimenta el Repositorio de problemas) -->
       <div class="card">
-        <div class="section-title" id="sec3-title">03 — Descripción técnica</div>
+        <div class="section-title" id="sec3-title">03 — Clasificación del problema</div>
+        <div class="field">
+          <label for="product" id="lbl-product">Producto afectado <span class="req">*</span></label>
+          <select id="product" name="product"></select>
+          <div class="field-error" id="err-product"></div>
+        </div>
+        <div class="field">
+          <label for="impact" id="lbl-impact">Peor consecuencia posible <span class="req">*</span></label>
+          <select id="impact" name="impact"></select>
+          <div class="field-error" id="err-impact"></div>
+        </div>
+        <div class="field">
+          <label for="scope" id="lbl-scope">¿Cuántas instalaciones conoces con este problema? <span class="req">*</span></label>
+          <select id="scope" name="scope"></select>
+          <div class="field-error" id="err-scope"></div>
+        </div>
+        <div class="field">
+          <label for="qi_id" id="lbl-qi">Nº de problema conocido (QI) <span class="opt">(opcional)</span></label>
+          <input type="text" id="qi_id" name="qi_id" autocomplete="off" placeholder="QI-012">
+          <div class="hint" id="hint-qi">Si ya sabes que es un problema registrado en la base de conocimiento, indica su número.</div>
+          <div class="field-error" id="err-qi"></div>
+        </div>
+      </div>
+      <!-- SECCIÓN 4: Descripción técnica -->
+      <div class="card">
+        <div class="section-title" id="sec4-title">04 — Descripción técnica</div>
         <div class="field">
           <label for="symptoms" id="lbl-symptoms">Síntomas y descripción del problema <span class="req">*</span></label>
           <textarea class="tall" id="symptoms" name="symptoms"></textarea>
@@ -331,7 +369,7 @@
   <!-- SUCCESS -->
   <div class="state-overlay" id="success-view">
     <div class="icon-circle success">✓</div>
-    <div class="state-title" id="success-title">Información enviada</div>
+    <div class="state-title" id="success-title">Escalada enviada</div>
     <p class="state-msg" id="success-msg">El equipo de soporte avanzado ha sido notificado. Puedes cerrar esta ventana.</p>
   </div>
   <!-- ERROR -->
@@ -342,6 +380,15 @@
   </div>
 </div>
 <script>
+// ── VALORES DEL REPOSITORIO DE PROBLEMAS ──────────────────────
+// El "value" de cada opción debe coincidir EXACTAMENTE con la columna de la lista de SharePoint.
+const PRODUCTS = ['Ecogo','Logix 40','EcoDrive','Syngo','Puertas / Operador (otros)','Flex','TFT100','Botoneras',
+  'Placas CEC / Car','SCADA','Limitador','Contrapeso / Pesas','Iluminación / LED','Telealarma (Avire)',
+  'Varios / Gama completa','Otro'];
+const IMPACT_VALUES = ['5 - Seguridad personas','4 - Equipo fuera de servicio','3 - Funcionamiento degradado',
+  '2 - Retraso montaje / puesta en marcha','1 - Menor / estético'];
+const SCOPE_VALUES = ['1 - Caso aislado','2 - Varias instalaciones','3 - Recurrente / en aumento','4 - Toda la serie'];
+
 // ── TRANSLATIONS ──────────────────────────────────────────────
 const i18n = {
   es: {
@@ -352,11 +399,24 @@ const i18n = {
     techLabel:     'Técnico MP',
     sec1:          '01 — Datos del caso',
     sec2:          '02 — Datos del cliente',
-    sec3:          '03 — Descripción técnica',
+    sec3:          '03 — Clasificación del problema',
+    sec4:          '04 — Descripción técnica',
     lblOrder:      'Nº de pedido / instalación',
     lblClientName: 'Nombre del cliente',
     lblContact:    'Teléfono / Email',
     hintContact:   'Introduce teléfono, correo o ambos',
+    lblProduct:    'Producto afectado',
+    lblImpact:     'Peor consecuencia posible',
+    lblScope:      '¿Cuántas instalaciones conoces con este problema?',
+    lblQi:         'Nº de problema conocido (QI)',
+    optional:      '(opcional)',
+    hintQi:        'Si ya sabes que es un problema registrado en la base de conocimiento, indica su número.',
+    errQi:         'Formato no válido. Ejemplo: QI-012',
+    choose:        '— Selecciona —',
+    productOther:  { 'Varios / Gama completa': 'Varios / Gama completa', 'Otro': 'Otro' },
+    impact: ['Riesgo para personas (atrapamiento, caída, eléctrico…)','Ascensor fuera de servicio',
+             'Funciona, pero mal o con fallos intermitentes','Retrasa el montaje o la puesta en marcha','Menor / estético'],
+    scope:  ['Solo esta instalación','Varias instalaciones (2–5)','Muchas / va en aumento','Afecta a toda la serie del producto'],
     lblSymptoms:   'Síntomas y descripción del problema',
     lblAttempted:  'Qué se ha intentado para solucionar',
     lblPending:    'Qué queda por resolver (concretamente)',
@@ -364,7 +424,7 @@ const i18n = {
     sending:       'Enviando...',
     errRequired:   'Este campo es obligatorio.',
     successTitle:  'Escalada enviada',
-    successMsg:    'El equipo de soporte avanzado ha sido notificado. Puedes cerrar esta ventana.',
+    successMsg:    'El equipo de soporte avanzado ha sido notificado. Recibirás en el ticket el número de problema asignado. Puedes cerrar esta ventana.',
     errorTitle:    'Error al enviar',
     errorMsg:      'No se han podido enviar los datos. Intenta de nuevo o contacta con el administrador.',
   },
@@ -376,11 +436,24 @@ const i18n = {
     techLabel:     'MP Technician',
     sec1:          '01 — Case details',
     sec2:          '02 — Customer details',
-    sec3:          '03 — Technical description',
+    sec3:          '03 — Problem classification',
+    sec4:          '04 — Technical description',
     lblOrder:      'Order / installation number',
     lblClientName: 'Customer name',
     lblContact:    'Phone / Email',
     hintContact:   'Enter phone, email or both',
+    lblProduct:    'Affected product',
+    lblImpact:     'Worst possible consequence',
+    lblScope:      'How many installations do you know with this problem?',
+    lblQi:         'Known problem number (QI)',
+    optional:      '(optional)',
+    hintQi:        'If you already know this problem is registered in the knowledge base, enter its number.',
+    errQi:         'Invalid format. Example: QI-012',
+    choose:        '— Select —',
+    productOther:  { 'Varios / Gama completa': 'Several / whole range', 'Otro': 'Other' },
+    impact: ['Risk to people (entrapment, fall, electrical…)','Lift out of service',
+             'Works, but badly or with intermittent faults','Delays installation or commissioning','Minor / cosmetic'],
+    scope:  ['Only this installation','Several installations (2–5)','Many / increasing','Affects the whole product series'],
     lblSymptoms:   'Symptoms and problem description',
     lblAttempted:  'What has been attempted to resolve the issue',
     lblPending:    'What remains to be resolved (specifically)',
@@ -388,7 +461,7 @@ const i18n = {
     sending:       'Sending...',
     errRequired:   'This field is required.',
     successTitle:  'Escalation submitted',
-    successMsg:    'The advanced support team has been notified. You can close this window.',
+    successMsg:    'The advanced support team has been notified. The assigned problem number will be added to the ticket. You can close this window.',
     errorTitle:    'Submission error',
     errorMsg:      'Could not send the data. Please try again or contact the administrator.',
   },
@@ -400,11 +473,24 @@ const i18n = {
     techLabel:     'Technicien MP',
     sec1:          '01 — Détails du dossier',
     sec2:          '02 — Données du client',
-    sec3:          '03 — Description technique',
+    sec3:          '03 — Classification du problème',
+    sec4:          '04 — Description technique',
     lblOrder:      'N° de commande / installation',
     lblClientName: 'Nom du client',
     lblContact:    'Téléphone / E-mail',
     hintContact:   'Entrez téléphone, e-mail ou les deux',
+    lblProduct:    'Produit concerné',
+    lblImpact:     'Pire conséquence possible',
+    lblScope:      'Combien d\'installations connaissez-vous avec ce problème ?',
+    lblQi:         'N° de problème connu (QI)',
+    optional:      '(facultatif)',
+    hintQi:        'Si vous savez déjà que ce problème est enregistré dans la base de connaissances, indiquez son numéro.',
+    errQi:         'Format invalide. Exemple : QI-012',
+    choose:        '— Sélectionnez —',
+    productOther:  { 'Varios / Gama completa': 'Plusieurs / toute la gamme', 'Otro': 'Autre' },
+    impact: ['Risque pour les personnes (blocage, chute, électrique…)','Ascenseur hors service',
+             'Fonctionne, mais mal ou avec des pannes intermittentes','Retarde le montage ou la mise en service','Mineur / esthétique'],
+    scope:  ['Uniquement cette installation','Plusieurs installations (2–5)','Nombreuses / en augmentation','Toute la série du produit'],
     lblSymptoms:   'Symptômes et description du problème',
     lblAttempted:  'Ce qui a été tenté pour résoudre le problème',
     lblPending:    'Ce qui reste à résoudre (concrètement)',
@@ -412,7 +498,7 @@ const i18n = {
     sending:       'Envoi en cours...',
     errRequired:   'Ce champ est obligatoire.',
     successTitle:  'Escalade envoyée',
-    successMsg:    'L\'équipe de support avancé a été notifiée. Vous pouvez fermer cette fenêtre.',
+    successMsg:    'L\'équipe de support avancé a été notifiée. Le numéro de problème attribué sera ajouté au ticket. Vous pouvez fermer cette fenêtre.',
     errorTitle:    'Erreur d\'envoi',
     errorMsg:      'Impossible d\'envoyer les données. Réessayez ou contactez l\'administrateur.',
   },
@@ -424,11 +510,24 @@ const i18n = {
     techLabel:     'MP-Techniker',
     sec1:          '01 — Falldaten',
     sec2:          '02 — Kundendaten',
-    sec3:          '03 — Technische Beschreibung',
+    sec3:          '03 — Problemklassifizierung',
+    sec4:          '04 — Technische Beschreibung',
     lblOrder:      'Bestell- / Installationsnummer',
     lblClientName: 'Kundenname',
     lblContact:    'Telefon / E-Mail',
     hintContact:   'Telefon, E-Mail oder beides eingeben',
+    lblProduct:    'Betroffenes Produkt',
+    lblImpact:     'Schlimmste mögliche Folge',
+    lblScope:      'Wie viele Anlagen mit diesem Problem kennen Sie?',
+    lblQi:         'Bekannte Problemnummer (QI)',
+    optional:      '(optional)',
+    hintQi:        'Wenn Sie bereits wissen, dass das Problem in der Wissensdatenbank erfasst ist, geben Sie die Nummer an.',
+    errQi:         'Ungültiges Format. Beispiel: QI-012',
+    choose:        '— Auswählen —',
+    productOther:  { 'Varios / Gama completa': 'Mehrere / gesamte Baureihe', 'Otro': 'Sonstiges' },
+    impact: ['Gefahr für Personen (Einschließen, Sturz, elektrisch…)','Aufzug außer Betrieb',
+             'Funktioniert, aber schlecht oder mit sporadischen Fehlern','Verzögert Montage oder Inbetriebnahme','Gering / optisch'],
+    scope:  ['Nur diese Anlage','Mehrere Anlagen (2–5)','Viele / zunehmend','Gesamte Produktserie betroffen'],
     lblSymptoms:   'Symptome und Problembeschreibung',
     lblAttempted:  'Was zur Behebung versucht wurde',
     lblPending:    'Was noch konkret zu lösen ist',
@@ -436,7 +535,7 @@ const i18n = {
     sending:       'Sende...',
     errRequired:   'Dieses Feld ist erforderlich.',
     successTitle:  'Eskalation gesendet',
-    successMsg:    'Das erweiterte Support-Team wurde benachrichtigt. Sie können dieses Fenster schließen.',
+    successMsg:    'Das erweiterte Support-Team wurde benachrichtigt. Die zugewiesene Problemnummer wird im Ticket ergänzt. Sie können dieses Fenster schließen.',
     errorTitle:    'Sendefehler',
     errorMsg:      'Die Daten konnten nicht gesendet werden. Versuchen Sie es erneut oder kontaktieren Sie den Administrator.',
   }
@@ -450,31 +549,72 @@ const lang         = i18n[rawLang] ? rawLang : 'es';
 const t            = i18n[lang];
 // URL de producción del Flujo 2 en n8n (Webhook, path "capa4-formulario")
 const webhookUrl = params.get('webhook') || 'https://mpascensores.app.n8n.cloud/webhook/capa4-formulario';
+
+const setText = (id, txt) => { document.getElementById(id).textContent = txt; };
+const setLabel = (id, txt, required = true) => {
+  document.getElementById(id).innerHTML = txt + (required ? ' <span class="req">*</span>' : ' <span class="opt">' + t.optional + '</span>');
+};
+function fillSelect(id, values, labels) {
+  const sel = document.getElementById(id);
+  sel.innerHTML = '';
+  const ph = document.createElement('option');
+  ph.value = ''; ph.textContent = t.choose;
+  sel.appendChild(ph);
+  values.forEach((v, i) => {
+    const o = document.createElement('option');
+    o.value = v;
+    o.textContent = labels ? labels[i] : v;
+    sel.appendChild(o);
+  });
+}
+
 // Apply translations
 document.documentElement.lang = lang;
-document.getElementById('badge-text').textContent       = t.badge;
-document.getElementById('main-title').textContent       = t.title;
-document.getElementById('main-subtitle').textContent    = t.subtitle;
-document.getElementById('ticket-label-text').textContent = t.ticketLabel;
-document.getElementById('ticket-display').textContent   = '#' + ticketId;
-document.getElementById('tech-label-text').textContent  = t.techLabel;
-document.getElementById('tech-display').textContent     = techName;
-document.getElementById('sec1-title').textContent       = t.sec1;
-document.getElementById('sec2-title').textContent       = t.sec2;
-document.getElementById('sec3-title').textContent       = t.sec3;
-document.getElementById('lbl-order').innerHTML          = t.lblOrder      + ' <span class="req">*</span>';
-document.getElementById('lbl-client-name').innerHTML    = t.lblClientName + ' <span class="req">*</span>';
-document.getElementById('lbl-contact').innerHTML        = t.lblContact    + ' <span class="req">*</span>';
-document.getElementById('hint-contact').textContent     = t.hintContact;
-document.getElementById('lbl-symptoms').innerHTML       = t.lblSymptoms   + ' <span class="req">*</span>';
-document.getElementById('lbl-attempted').innerHTML      = t.lblAttempted  + ' <span class="req">*</span>';
-document.getElementById('lbl-pending').innerHTML        = t.lblPending    + ' <span class="req">*</span>';
-document.getElementById('submit-label').textContent     = t.submit;
-document.getElementById('success-title').textContent    = t.successTitle;
-document.getElementById('success-msg').textContent      = t.successMsg;
-document.getElementById('error-title').textContent      = t.errorTitle;
-document.getElementById('error-msg').textContent        = t.errorMsg;
+setText('badge-text', t.badge);
+setText('main-title', t.title);
+setText('main-subtitle', t.subtitle);
+setText('ticket-label-text', t.ticketLabel);
+setText('ticket-display', '#' + ticketId);
+setText('tech-label-text', t.techLabel);
+setText('tech-display', techName);
+setText('sec1-title', t.sec1);
+setText('sec2-title', t.sec2);
+setText('sec3-title', t.sec3);
+setText('sec4-title', t.sec4);
+setLabel('lbl-order', t.lblOrder);
+setLabel('lbl-client-name', t.lblClientName);
+setLabel('lbl-contact', t.lblContact);
+setText('hint-contact', t.hintContact);
+setLabel('lbl-product', t.lblProduct);
+setLabel('lbl-impact', t.lblImpact);
+setLabel('lbl-scope', t.lblScope);
+setLabel('lbl-qi', t.lblQi, false);
+setText('hint-qi', t.hintQi);
+setLabel('lbl-symptoms', t.lblSymptoms);
+setLabel('lbl-attempted', t.lblAttempted);
+setLabel('lbl-pending', t.lblPending);
+setText('submit-label', t.submit);
+setText('success-title', t.successTitle);
+setText('success-msg', t.successMsg);
+setText('error-title', t.errorTitle);
+setText('error-msg', t.errorMsg);
+
+fillSelect('product', PRODUCTS, PRODUCTS.map(p => t.productOther[p] || p));
+fillSelect('impact', IMPACT_VALUES, t.impact);
+fillSelect('scope', SCOPE_VALUES, t.scope);
+
 // ── VALIDATION ────────────────────────────────────────────────
+const FIELDS = [
+  { id: 'order_number',  err: 'err-order'       },
+  { id: 'client_name',   err: 'err-client-name' },
+  { id: 'client_contact',err: 'err-contact'     },
+  { id: 'product',       err: 'err-product'     },
+  { id: 'impact',        err: 'err-impact'      },
+  { id: 'scope',         err: 'err-scope'       },
+  { id: 'symptoms',      err: 'err-symptoms'    },
+  { id: 'attempted',     err: 'err-attempted'   },
+  { id: 'pending',       err: 'err-pending'     },
+];
 function showError(id, msg) {
   const el = document.getElementById(id);
   el.textContent = msg;
@@ -488,17 +628,16 @@ function markField(inputId, hasError) {
   if (hasError) el.classList.add('error');
   else          el.classList.remove('error');
 }
+// Normaliza "12", "qi12", "QI-012" → "QI-012". Devuelve '' si vacío, null si no válido.
+function normalizeQi(raw) {
+  const v = raw.trim();
+  if (!v) return '';
+  const m = v.match(/^(?:qi)?\s*-?\s*0*(\d{1,5})$/i);
+  return m ? 'QI-' + m[1].padStart(3, '0') : null;
+}
 function validate() {
   let valid = true;
-  const fields = [
-    { id: 'order_number',  err: 'err-order'       },
-    { id: 'client_name',   err: 'err-client-name' },
-    { id: 'client_contact',err: 'err-contact'     },
-    { id: 'symptoms',      err: 'err-symptoms'    },
-    { id: 'attempted',     err: 'err-attempted'   },
-    { id: 'pending',       err: 'err-pending'     },
-  ];
-  fields.forEach(f => {
+  FIELDS.forEach(f => {
     const val = document.getElementById(f.id).value.trim();
     if (!val) {
       showError(f.err, t.errRequired);
@@ -509,24 +648,23 @@ function validate() {
       markField(f.id, false);
     }
   });
+  if (normalizeQi(document.getElementById('qi_id').value) === null) {
+    showError('err-qi', t.errQi);
+    markField('qi_id', true);
+    valid = false;
+  } else {
+    clearError('err-qi');
+    markField('qi_id', false);
+  }
   return valid;
 }
-// Clear errors on input
-['order_number','client_name','client_contact','symptoms','attempted','pending']
-  .forEach(id => {
-    document.getElementById(id).addEventListener('input', () => {
-      const errMap = {
-        order_number:   'err-order',
-        client_name:    'err-client-name',
-        client_contact: 'err-contact',
-        symptoms:       'err-symptoms',
-        attempted:      'err-attempted',
-        pending:        'err-pending',
-      };
-      clearError(errMap[id]);
-      markField(id, false);
-    });
-  });
+// Clear errors on input / change
+FIELDS.concat([{ id: 'qi_id', err: 'err-qi' }]).forEach(f => {
+  const el = document.getElementById(f.id);
+  const handler = () => { clearError(f.err); markField(f.id, false); };
+  el.addEventListener('input', handler);
+  el.addEventListener('change', handler);
+});
 // ── SUBMIT ────────────────────────────────────────────────────
 document.getElementById('escalation-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -543,6 +681,10 @@ document.getElementById('escalation-form').addEventListener('submit', async (e) 
     order_number:   document.getElementById('order_number').value.trim(),
     client_name:    document.getElementById('client_name').value.trim(),
     client_contact: document.getElementById('client_contact').value.trim(),
+    product:        document.getElementById('product').value,
+    impact:         document.getElementById('impact').value,
+    scope:          document.getElementById('scope').value,
+    qi_id:          normalizeQi(document.getElementById('qi_id').value) || '',
     symptoms:       document.getElementById('symptoms').value.trim(),
     attempted:      document.getElementById('attempted').value.trim(),
     pending:        document.getElementById('pending').value.trim(),
