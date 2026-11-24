@@ -280,12 +280,19 @@
     .radio-card:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
     .radio-card input{accent-color:var(--accent)}
     .card.closing{border-left:3px solid var(--success)}
+    .lang-switch{position:absolute;top:0;right:0;display:flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;font-family:var(--mono);font-size:12px}
+    .lang-switch button{background:var(--surface);color:var(--text-muted);border:none;padding:6px 12px;cursor:pointer;letter-spacing:.06em}
+    .lang-switch button+button{border-left:1px solid var(--border)}
+    .lang-switch button.active{background:var(--accent-dim);color:var(--accent);font-weight:500}
+    .header{position:relative}
+
   </style>
 </head>
 <body>
 <div class="wrapper">
   <div id="form-view">
     <div class="header">
+      <div class="lang-switch" id="lang-switch"><button type="button" data-lang="es">ES</button><button type="button" data-lang="en">EN</button><button type="button" data-lang="fr">FR</button></div>
       <div class="header-badge" id="badge-text"></div>
       <h1 id="main-title"></h1>
       <p class="subtitle" id="main-subtitle"></p>
@@ -498,9 +505,7 @@ const params   = new URLSearchParams(window.location.search);
 const ticketId = params.get('ticket_id') || '';
 const role     = params.get('role') === 'capa4' ? 'capa4' : 'dueno';
 const key      = params.get('k') || '';
-const rawLang  = (params.get('lang') || 'es').toLowerCase();
-const lang     = i18n[rawLang] ? rawLang : 'es';
-const t        = Object.assign({}, i18n.es, i18n[lang]);   // textos solo de Capa 4 caen a español
+let lang, t;
 const webhookUrl = params.get('webhook') || 'https://mpascensores.app.n8n.cloud/webhook/capa4-actualizacion';
 const $ = id => document.getElementById(id);
 
@@ -516,6 +521,8 @@ function fillSelect(id, values, labels, placeholder) {
   values.forEach((v, i) => { const o = document.createElement('option'); o.value = v; o.textContent = labels ? labels[i] : v; sel.appendChild(o); });
 }
 
+function applyLang(l) {
+lang = l; t = Object.assign({}, i18n.es, i18n[l]);   // textos solo de Capa 4 caen a español
 document.documentElement.lang = lang;
 setText('badge-text', t.badge); setText('main-title', t.title); setText('main-subtitle', t.subtitle);
 setText('ticket-label-text', t.ticketLabel); setText('ticket-display', '#' + (ticketId || '—'));
@@ -533,12 +540,33 @@ setText('submit-label', t.submit);
 setText('success-title', t.successTitle); setText('success-msg', t.successMsg);
 setText('error-title', t.errorTitle); setText('error-msg', t.errorMsg);
 
+const keep = ['ball','problem_state','solution_type','category'].map(id => $(id).value);
 // Opciones de "Pelota en" según rol: el dueño solo puede devolverla a Capa 4 o quedársela
 const ballKeys = role === 'capa4' ? ['capa4','dueno','tercero','validacion'] : ['capa4','dueno'];
 fillSelect('ball', ballKeys.map(k => BALL[k]), ballKeys.map(k => t.ballOpts[k]));
 fillSelect('problem_state', STATES, null, t.stateKeep);
 fillSelect('solution_type', SOL_TYPES);
 fillSelect('category', CATEGORIES);
+['ball','problem_state','solution_type','category'].forEach((id, i) => { $(id).value = keep[i]; });
+document.querySelectorAll('.field-error.visible').forEach(e => e.classList.remove('visible'));
+if (typeof refresh === "function" && window.__ready) refresh();
+}
+
+// ── SELECTOR DE IDIOMA (ES / EN / FR) ──
+// Prioridad: ?lang= de la URL → idioma del navegador → inglés. Se guarda en la URL al cambiar.
+function pickLang() {
+  const p = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+  if (i18n[p]) return p;
+  const nav = (navigator.language || '').slice(0, 2).toLowerCase();
+  return ['es','en','fr'].includes(nav) ? nav : 'en';
+}
+function setLang(l) {
+  const u = new URL(location.href); u.searchParams.set('lang', l); history.replaceState(null, '', u);
+  applyLang(l);
+  document.querySelectorAll('#lang-switch button').forEach(b => b.classList.toggle('active', b.dataset.lang === l));
+}
+document.querySelectorAll('#lang-switch button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+setLang(pickLang());
 
 if (role === 'capa4') { $('card-mode').classList.add('hidden'); }
 else { document.querySelectorAll('.capa4-only').forEach(el => el.classList.add('hidden')); }
@@ -561,6 +589,7 @@ $('ball').addEventListener('change', () => {
   if (role === 'capa4' && $('ball').value === BALL.tercero && !$('problem_state').value) $('problem_state').value = '6. En espera (tercero)';
   refresh();
 });
+window.__ready = true;
 refresh();
 
 // ── VALIDACIÓN ──

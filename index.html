@@ -92,6 +92,12 @@
       font-size: 14px;
       line-height: 1.5;
     }
+
+    .lang-switch{position:absolute;top:0;right:0;display:flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;font-family:var(--mono);font-size:12px}
+    .lang-switch button{background:var(--surface);color:var(--text-muted);border:none;padding:6px 12px;cursor:pointer;letter-spacing:.06em}
+    .lang-switch button+button{border-left:1px solid var(--border)}
+    .lang-switch button.active{background:var(--accent-dim);color:var(--accent);font-weight:500}
+    .header{position:relative}
     /* ── BANNER (ticket + técnico) ── */
     .ticket-banner {
       display: grid;
@@ -275,6 +281,7 @@
   <!-- FORM VIEW -->
   <div id="form-view">
     <div class="header">
+      <div class="lang-switch" id="lang-switch"><button type="button" data-lang="es">ES</button><button type="button" data-lang="en">EN</button><button type="button" data-lang="fr">FR</button></div>
       <div class="header-badge" id="badge-text">Escalada Capa 4</div>
       <h1 id="main-title">Información para escalada a Capa 4</h1>
       <p class="subtitle" id="main-subtitle">Rellena todos los campos antes de que se notifique al equipo de soporte avanzado.</p>
@@ -354,8 +361,9 @@
           <div class="field-error" id="err-attempted"></div>
         </div>
         <div class="field">
-          <label for="pending" id="lbl-pending">Qué queda por resolver (concretamente) <span class="req">*</span></label>
+          <label for="pending" id="lbl-pending">Qué necesitas exactamente de Capa 4 <span class="req">*</span></label>
           <textarea id="pending" name="pending"></textarea>
+          <div class="hint" id="hint-pending"></div>
           <div class="field-error" id="err-pending"></div>
         </div>
       </div>
@@ -419,12 +427,14 @@ const i18n = {
     scope:  ['Solo esta instalación','Varias instalaciones (2–5)','Muchas / va en aumento','Afecta a toda la serie del producto'],
     lblSymptoms:   'Síntomas y descripción del problema',
     lblAttempted:  'Qué se ha intentado para solucionar',
-    lblPending:    'Qué queda por resolver (concretamente)',
+    lblPending:    'Qué necesitas exactamente de Capa 4',
+    hintPending:   'Pide algo concreto: una respuesta, un valor de parámetro, un software, una revisión remota, una visita… Mínimo 30 caracteres.',
+    errShort:      'Concreta más qué necesitas (mínimo 30 caracteres).',
     submit:        'Escalar Ticket',
     sending:       'Enviando...',
     errRequired:   'Este campo es obligatorio.',
     successTitle:  'Escalada enviada',
-    successMsg:    'El equipo de soporte avanzado ha sido notificado. Recibirás en el ticket el número de problema asignado. Puedes cerrar esta ventana.',
+    successMsg:    'Capa 4 ha sido notificada. Sigues siendo el dueño de este caso: recibirás por correo el número de problema asignado y cada avance aparecerá en el ticket. Puedes cerrar esta ventana.',
     errorTitle:    'Error al enviar',
     errorMsg:      'No se han podido enviar los datos. Intenta de nuevo o contacta con el administrador.',
   },
@@ -456,12 +466,14 @@ const i18n = {
     scope:  ['Only this installation','Several installations (2–5)','Many / increasing','Affects the whole product series'],
     lblSymptoms:   'Symptoms and problem description',
     lblAttempted:  'What has been attempted to resolve the issue',
-    lblPending:    'What remains to be resolved (specifically)',
+    lblPending:    'What exactly do you need from Layer 4',
+    hintPending:   'Ask for something concrete: an answer, a parameter value, a software version, a remote check, a visit… Minimum 30 characters.',
+    errShort:      'Please be more specific about what you need (minimum 30 characters).',
     submit:        'Escalate Ticket',
     sending:       'Sending...',
     errRequired:   'This field is required.',
     successTitle:  'Escalation submitted',
-    successMsg:    'The advanced support team has been notified. The assigned problem number will be added to the ticket. You can close this window.',
+    successMsg:    'Layer 4 has been notified. You remain the owner of this case: you will receive the assigned problem number by email and every step will appear in the ticket. You can close this window.',
     errorTitle:    'Submission error',
     errorMsg:      'Could not send the data. Please try again or contact the administrator.',
   },
@@ -493,12 +505,14 @@ const i18n = {
     scope:  ['Uniquement cette installation','Plusieurs installations (2–5)','Nombreuses / en augmentation','Toute la série du produit'],
     lblSymptoms:   'Symptômes et description du problème',
     lblAttempted:  'Ce qui a été tenté pour résoudre le problème',
-    lblPending:    'Ce qui reste à résoudre (concrètement)',
+    lblPending:    'De quoi avez-vous besoin exactement de la Couche 4',
+    hintPending:   'Demandez quelque chose de concret : une réponse, une valeur de paramètre, un logiciel, une vérification à distance, une visite… 30 caractères minimum.',
+    errShort:      'Précisez davantage votre besoin (30 caractères minimum).',
     submit:        'Escalader le ticket',
     sending:       'Envoi en cours...',
     errRequired:   'Ce champ est obligatoire.',
     successTitle:  'Escalade envoyée',
-    successMsg:    'L\'équipe de support avancé a été notifiée. Le numéro de problème attribué sera ajouté au ticket. Vous pouvez fermer cette fenêtre.',
+    successMsg:    'La Couche 4 a été notifiée. Vous restez responsable de ce dossier : vous recevrez par e-mail le numéro de problème attribué et chaque avancée apparaîtra dans le ticket. Vous pouvez fermer cette fenêtre.',
     errorTitle:    'Erreur d\'envoi',
     errorMsg:      'Impossible d\'envoyer les données. Réessayez ou contactez l\'administrateur.',
   },
@@ -530,12 +544,14 @@ const i18n = {
     scope:  ['Nur diese Anlage','Mehrere Anlagen (2–5)','Viele / zunehmend','Gesamte Produktserie betroffen'],
     lblSymptoms:   'Symptome und Problembeschreibung',
     lblAttempted:  'Was zur Behebung versucht wurde',
-    lblPending:    'Was noch konkret zu lösen ist',
+    lblPending:    'Was genau benötigen Sie von Ebene 4',
+    hintPending:   'Fordern Sie etwas Konkretes an: eine Antwort, einen Parameterwert, eine Software, eine Fernprüfung, einen Besuch… Mindestens 30 Zeichen.',
+    errShort:      'Bitte konkretisieren Sie, was Sie benötigen (mindestens 30 Zeichen).',
     submit:        'Ticket eskalieren',
     sending:       'Sende...',
     errRequired:   'Dieses Feld ist erforderlich.',
     successTitle:  'Eskalation gesendet',
-    successMsg:    'Das erweiterte Support-Team wurde benachrichtigt. Die zugewiesene Problemnummer wird im Ticket ergänzt. Sie können dieses Fenster schließen.',
+    successMsg:    'Ebene 4 wurde benachrichtigt. Sie bleiben Verantwortlicher dieses Falls: Sie erhalten die zugewiesene Problemnummer per E-Mail, und jeder Fortschritt erscheint im Ticket. Sie können dieses Fenster schließen.',
     errorTitle:    'Sendefehler',
     errorMsg:      'Die Daten konnten nicht gesendet werden. Versuchen Sie es erneut oder kontaktieren Sie den Administrator.',
   }
@@ -544,9 +560,7 @@ const i18n = {
 const params       = new URLSearchParams(window.location.search);
 const ticketId     = params.get('ticket_id')   || '—';
 const techName     = params.get('technician')  || '—';
-const rawLang      = (params.get('lang') || 'es').toLowerCase();
-const lang         = i18n[rawLang] ? rawLang : 'es';
-const t            = i18n[lang];
+let lang, t;
 // URL de producción del Flujo 2 en n8n (Webhook, path "capa4-formulario")
 const webhookUrl = params.get('webhook') || 'https://mpascensores.app.n8n.cloud/webhook/capa4-formulario';
 
@@ -568,6 +582,8 @@ function fillSelect(id, values, labels) {
   });
 }
 
+function applyLang(l) {
+lang = l; t = i18n[l];
 // Apply translations
 document.documentElement.lang = lang;
 setText('badge-text', t.badge);
@@ -593,15 +609,36 @@ setText('hint-qi', t.hintQi);
 setLabel('lbl-symptoms', t.lblSymptoms);
 setLabel('lbl-attempted', t.lblAttempted);
 setLabel('lbl-pending', t.lblPending);
+setText('hint-pending', t.hintPending);
 setText('submit-label', t.submit);
 setText('success-title', t.successTitle);
 setText('success-msg', t.successMsg);
 setText('error-title', t.errorTitle);
 setText('error-msg', t.errorMsg);
 
+const keep = ['product','impact','scope'].map(id => document.getElementById(id).value);
 fillSelect('product', PRODUCTS, PRODUCTS.map(p => t.productOther[p] || p));
 fillSelect('impact', IMPACT_VALUES, t.impact);
 fillSelect('scope', SCOPE_VALUES, t.scope);
+['product','impact','scope'].forEach((id, i) => { document.getElementById(id).value = keep[i]; });
+document.querySelectorAll('.field-error.visible').forEach(e => e.classList.remove('visible'));
+}
+
+// ── SELECTOR DE IDIOMA (ES / EN / FR) ──
+// Prioridad: ?lang= de la URL → idioma del navegador → inglés. Se guarda en la URL al cambiar.
+function pickLang() {
+  const p = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+  if (i18n[p]) return p;
+  const nav = (navigator.language || '').slice(0, 2).toLowerCase();
+  return ['es','en','fr'].includes(nav) ? nav : 'en';
+}
+function setLang(l) {
+  const u = new URL(location.href); u.searchParams.set('lang', l); history.replaceState(null, '', u);
+  applyLang(l);
+  document.querySelectorAll('#lang-switch button').forEach(b => b.classList.toggle('active', b.dataset.lang === l));
+}
+document.querySelectorAll('#lang-switch button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+setLang(pickLang());
 
 // ── VALIDATION ────────────────────────────────────────────────
 const FIELDS = [
@@ -648,6 +685,12 @@ function validate() {
       markField(f.id, false);
     }
   });
+  const pend = document.getElementById('pending').value.trim();
+  if (pend && pend.length < 30) {
+    showError('err-pending', t.errShort);
+    markField('pending', true);
+    valid = false;
+  }
   if (normalizeQi(document.getElementById('qi_id').value) === null) {
     showError('err-qi', t.errQi);
     markField('qi_id', true);
