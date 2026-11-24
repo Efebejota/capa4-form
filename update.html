@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seguimiento Capa 4 / Layer 4 follow-up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         #0f1117;
+      --surface:    #181c27;
+      --border:     #2a2f42;
+      --border-hover: #3d4460;
+      --accent:     #e8501a;
+      --accent-dim: rgba(232,80,26,0.15);
+      --text:       #e2e6f0;
+      --text-muted: #7b849a;
+      --label:      #a0a8bc;
+      --input-bg:   #12151e;
+      --success:    #2ecc71;
+      --radius:     6px;
+      --font:       'IBM Plex Sans', sans-serif;
+      --mono:       'IBM Plex Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px 60px;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(232,80,26,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,80,26,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .wrapper {
+      width: 100%;
+      max-width: 640px;
+      position: relative;
+      z-index: 1;
+    }
+    /* ── HEADER ── */
+    .header { margin-bottom: 32px; }
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .header-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    /* ── BANNER (ticket + técnico) ── */
+    .ticket-banner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 28px;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+    .banner-cell {
+      background: var(--surface);
+      padding: 12px 16px;
+    }
+    .banner-label {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+    .banner-value {
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .banner-value.tech {
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    /* ── FORM CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+    }
+    .field { margin-bottom: 20px; }
+    .field:last-child { margin-bottom: 0; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--label);
+      margin-bottom: 6px;
+    }
+    label .req { color: var(--accent); margin-left: 3px; }
+    label .opt { color: var(--text-muted); font-weight: 400; margin-left: 4px; }
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.5;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      resize: vertical;
+    }
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      padding-right: 36px;
+      background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+                        linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+      background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+    select option { background: var(--surface); color: var(--text); }
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    input.error, textarea.error, select.error {
+      border-color: #e74c3c;
+      box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
+    }
+    textarea { min-height: 90px; }
+    textarea.tall { min-height: 110px; }
+    .hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+    .field-error {
+      font-size: 12px;
+      color: #e74c3c;
+      margin-top: 5px;
+      display: none;
+    }
+    .field-error.visible { display: block; }
+    /* ── SUBMIT ── */
+    .submit-area { margin-top: 24px; }
+    button[type="submit"] {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 13px 24px;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button[type="submit"]:hover  { background: #d04415; }
+    button[type="submit"]:active { transform: scale(0.99); }
+    button[type="submit"]:disabled {
+      background: #4a2d22;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+    /* ── STATES ── */
+    .state-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .state-overlay.active { display: flex; }
+    .icon-circle {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    .icon-circle.success { background: rgba(46,204,113,0.15); }
+    .icon-circle.error   { background: rgba(231,76,60,0.15); }
+    .state-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+    .state-msg   { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  <style>
+    input[type="date"]{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;color-scheme:dark}
+    input[type="date"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+    .hidden{display:none!important}
+    .check{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--text);cursor:pointer}
+    .check input{margin-top:3px;accent-color:var(--accent)}
+    .radio-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .radio-card{border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;cursor:pointer;background:var(--input-bg);font-size:14px;display:flex;gap:10px;align-items:center}
+    .radio-card:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+    .radio-card input{accent-color:var(--accent)}
+    .card.closing{border-left:3px solid var(--success)}
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div id="form-view">
+    <div class="header">
+      <div class="header-badge" id="badge-text"></div>
+      <h1 id="main-title"></h1>
+      <p class="subtitle" id="main-subtitle"></p>
+    </div>
+    <div class="ticket-banner">
+      <div class="banner-cell">
+        <div class="banner-label" id="ticket-label-text"></div>
+        <div class="banner-value" id="ticket-display">#—</div>
+      </div>
+      <div class="banner-cell">
+        <div class="banner-label" id="role-label-text"></div>
+        <div class="banner-value tech" id="role-display">—</div>
+      </div>
+    </div>
+    <form id="update-form" novalidate>
+
+      <!-- Solo dueño: tipo de actualización -->
+      <div class="card" id="card-mode">
+        <div class="section-title" id="sec-mode"></div>
+        <div class="radio-row">
+          <label class="radio-card"><input type="radio" name="mode" value="avance" checked> <span id="lbl-mode-avance"></span></label>
+          <label class="radio-card"><input type="radio" name="mode" value="validacion"> <span id="lbl-mode-val"></span></label>
+        </div>
+      </div>
+
+      <!-- Avance (Capa 4 y dueño) -->
+      <div class="card" id="card-step">
+        <div class="section-title" id="sec-step"></div>
+        <div class="field">
+          <label for="done" id="lbl-done"></label>
+          <textarea id="done"></textarea>
+          <div class="field-error" id="err-done"></div>
+        </div>
+        <div class="field">
+          <label for="result" id="lbl-result"></label>
+          <textarea id="result"></textarea>
+          <div class="field-error" id="err-result"></div>
+        </div>
+        <div class="field">
+          <label for="next_step" id="lbl-next"></label>
+          <textarea id="next_step"></textarea>
+          <div class="field-error" id="err-next"></div>
+        </div>
+      </div>
+
+      <div class="card" id="card-ball">
+        <div class="section-title" id="sec-ball"></div>
+        <div class="field">
+          <label for="ball" id="lbl-ball"></label>
+          <select id="ball"></select>
+          <div class="field-error" id="err-ball"></div>
+        </div>
+        <div class="field hidden" id="wrap-need">
+          <label for="need" id="lbl-need"></label>
+          <textarea id="need"></textarea>
+          <div class="hint" id="hint-need"></div>
+          <div class="field-error" id="err-need"></div>
+        </div>
+        <div class="field capa4-only">
+          <label for="due_date" id="lbl-due"></label>
+          <input type="date" id="due_date">
+          <div class="hint" id="hint-due"></div>
+        </div>
+        <div class="field capa4-only">
+          <label for="problem_state" id="lbl-state"></label>
+          <select id="problem_state"></select>
+          <div class="hint" id="hint-state"></div>
+        </div>
+      </div>
+
+      <!-- Cierre propuesto por Capa 4 -->
+      <div class="card closing hidden" id="card-closing">
+        <div class="section-title" id="sec-closing"></div>
+        <div class="field">
+          <label for="solution" id="lbl-solution"></label>
+          <textarea class="tall" id="solution"></textarea>
+          <div class="hint" id="hint-solution"></div>
+          <div class="field-error" id="err-solution"></div>
+        </div>
+        <div class="field">
+          <label for="solution_type" id="lbl-soltype"></label>
+          <select id="solution_type"></select>
+          <div class="field-error" id="err-soltype"></div>
+        </div>
+        <div class="field">
+          <label for="category" id="lbl-category"></label>
+          <select id="category"></select>
+          <div class="field-error" id="err-category"></div>
+        </div>
+        <div class="field">
+          <label class="check"><input type="checkbox" id="publish"> <span id="lbl-publish"></span></label>
+        </div>
+      </div>
+
+      <!-- Validación del dueño -->
+      <div class="card closing hidden" id="card-validation">
+        <div class="section-title" id="sec-val"></div>
+        <div class="field">
+          <div class="radio-row">
+            <label class="radio-card"><input type="radio" name="validation" value="ok"> <span id="lbl-val-ok"></span></label>
+            <label class="radio-card"><input type="radio" name="validation" value="ko"> <span id="lbl-val-ko"></span></label>
+          </div>
+          <div class="field-error" id="err-validation"></div>
+        </div>
+        <div class="field">
+          <label for="val_comment" id="lbl-val-comment"></label>
+          <textarea id="val_comment"></textarea>
+          <div class="field-error" id="err-val-comment"></div>
+        </div>
+      </div>
+
+      <div class="submit-area">
+        <button type="submit" id="submit-btn"><span id="submit-label"></span></button>
+      </div>
+    </form>
+  </div>
+
+  <div class="state-overlay" id="success-view">
+    <div class="icon-circle success">✓</div>
+    <div class="state-title" id="success-title"></div>
+    <p class="state-msg" id="success-msg"></p>
+  </div>
+  <div class="state-overlay" id="error-view">
+    <div class="icon-circle error">!</div>
+    <div class="state-title" id="error-title"></div>
+    <p class="state-msg" id="error-msg"></p>
+  </div>
+</div>
+<script>
+// ── VALORES (deben coincidir EXACTAMENTE con Zendesk y con el Repositorio de problemas) ──
+const BALL = {               // valor enviado = etiqueta del campo Zendesk 40908711404189
+  capa4:      'c4_pelota_capa4',
+  dueno:      'c4_pelota_dueno',
+  tercero:    'c4_pelota_tercero',
+  validacion: 'c4_pelota_validacion',
+};
+const STATES = ['2. En análisis','3. Escalado a área','4. Propuesta de mejora','5. Mejora en implantación','6. En espera (tercero)'];
+const SOL_TYPES = ['Solución local','Corrección de esquema / doc','Actualización de software','Modificación de diseño','Cambio de componente','IT / Protocolo','Formación'];
+const CATEGORIES = ['Diseño','Software / Firmware','Documentación / Esquemas','Fabricación','Proveedor / Componente','Logística / Embalaje','Configurador / Pedido','Montaje en obra'];
+
+const i18n = {
+  es: {
+    badge:'Seguimiento Capa 4', title:'Actualizar escalado', subtitle:'Cada paso queda registrado en el ticket y avisa a la otra parte.',
+    ticketLabel:'Ticket', roleLabel:'Actualizas como', roleCapa4:'Capa 4', roleOwner:'Dueño del caso',
+    secMode:'00 — ¿Qué quieres registrar?', modeAvance:'Un avance', modeVal:'Validar la solución en campo',
+    secStep:'01 — Este paso', lblDone:'Qué se ha hecho', lblResult:'Resultado (qué se confirma o descarta)', lblNext:'Siguiente paso',
+    secBall:'02 — Quién tiene la pelota', lblBall:'Pelota en',
+    ballOpts:{capa4:'Capa 4', dueno:'Dueño del caso', tercero:'Tercero (I+D / fábrica / proveedor)', validacion:'Solución propuesta – validación del dueño'},
+    lblNeed:'Qué necesitas del dueño', hintNeed:'Una acción concreta: medir, enviar un parámetro, ir a la instalación, probar…',
+    lblDue:'Fecha comprometida', hintDue:'Cuándo esperas el siguiente movimiento. Se guarda como "Próxima revisión" en el Repositorio.',
+    lblState:'Estado del problema en el Repositorio', stateKeep:'— No cambiar —', hintState:'El Repositorio lo usan también calidad e I+D: cámbialo solo si sabes que ha cambiado.',
+    secClosing:'03 — Propuesta de cierre', lblSolution:'Solución para técnicos', hintSolution:'Escríbela para el próximo técnico que se encuentre este problema.',
+    lblSolType:'Tipo de solución', lblCategory:'Categoría (causa raíz)', lblPublish:'Publicar en la base de conocimiento',
+    secVal:'01 — Validación en campo', valOk:'Funciona en campo', valKo:'No funciona', lblValComment:'Comentario',
+    choose:'— Selecciona —', optional:'(opcional)', errRequired:'Este campo es obligatorio.',
+    submit:'Registrar', sending:'Enviando...',
+    successTitle:'Actualización registrada', successMsg:'Ya está en el ticket y se ha avisado a la otra parte. Puedes cerrar esta ventana.',
+    errorTitle:'No se ha podido confirmar', errorMsg:'Antes de reenviar, comprueba en el ticket si ha aparecido la nota "[Capa 4 · Actualización]". Si no está, vuelve a intentarlo o avisa al administrador.',
+  },
+  en: {
+    badge:'Layer 4 follow-up', title:'Update escalation', subtitle:'Every step is logged in the ticket and notifies the other party.',
+    ticketLabel:'Ticket', roleLabel:'Updating as', roleCapa4:'Layer 4', roleOwner:'Case owner',
+    secMode:'00 — What do you want to log?', modeAvance:'A progress step', modeVal:'Validate the solution on site',
+    secStep:'01 — This step', lblDone:'What has been done', lblResult:'Result (what is confirmed or ruled out)', lblNext:'Next step',
+    secBall:'02 — Who has the ball', lblBall:'Ball is with',
+    ballOpts:{capa4:'Layer 4', dueno:'Case owner (me)', tercero:'Third party (R&D / factory / supplier)', validacion:'Solution proposed – owner validation'},
+    lblNeed:'What you need from the owner', hintNeed:'A concrete action: measure, send a parameter, visit the site, test…',
+    lblDue:'Committed date', hintDue:'When the next move is expected.',
+    lblState:'Problem status in the Repository', stateKeep:'— Do not change —', hintState:'Change it only if you know it has changed.',
+    secClosing:'03 — Closing proposal', lblSolution:'Solution for technicians', hintSolution:'Write it for the next technician who meets this problem.',
+    lblSolType:'Solution type', lblCategory:'Category (root cause)', lblPublish:'Publish in the knowledge base',
+    secVal:'01 — On-site validation', valOk:'Works on site', valKo:'Does not work', lblValComment:'Comment',
+    choose:'— Select —', optional:'(optional)', errRequired:'This field is required.',
+    submit:'Submit', sending:'Sending...',
+    successTitle:'Update logged', successMsg:'It is in the ticket and the other party has been notified. You can close this window.',
+    errorTitle:'Could not confirm', errorMsg:'Before resending, check whether the note "[Capa 4 · Actualización]" appears in the ticket. If not, try again or contact the administrator.',
+  },
+  fr: {
+    badge:'Suivi Couche 4', title:'Mettre à jour l\'escalade', subtitle:'Chaque étape est enregistrée dans le ticket et notifie l\'autre partie.',
+    ticketLabel:'Ticket', roleLabel:'Vous mettez à jour en tant que', roleCapa4:'Couche 4', roleOwner:'Responsable du dossier',
+    secMode:'00 — Que voulez-vous enregistrer ?', modeAvance:'Une avancée', modeVal:'Valider la solution sur site',
+    secStep:'01 — Cette étape', lblDone:'Ce qui a été fait', lblResult:'Résultat (ce qui est confirmé ou écarté)', lblNext:'Étape suivante',
+    secBall:'02 — Qui a la main', lblBall:'La main est à',
+    ballOpts:{capa4:'Couche 4', dueno:'Responsable du dossier (moi)', tercero:'Tiers (R&D / usine / fournisseur)', validacion:'Solution proposée – validation du responsable'},
+    lblNeed:'Ce dont vous avez besoin du responsable', hintNeed:'Une action concrète : mesurer, envoyer un paramètre, aller sur site, tester…',
+    secVal:'01 — Validation sur site', valOk:'Fonctionne sur site', valKo:'Ne fonctionne pas', lblValComment:'Commentaire',
+    choose:'— Sélectionnez —', optional:'(facultatif)', errRequired:'Ce champ est obligatoire.',
+    submit:'Enregistrer', sending:'Envoi en cours...',
+    successTitle:'Mise à jour enregistrée', successMsg:'Elle figure dans le ticket et l\'autre partie a été notifiée. Vous pouvez fermer cette fenêtre.',
+    errorTitle:'Confirmation impossible', errorMsg:'Avant de renvoyer, vérifiez si la note « [Capa 4 · Actualización] » apparaît dans le ticket. Sinon, réessayez ou contactez l\'administrateur.',
+  },
+  de: {
+    badge:'Nachverfolgung Ebene 4', title:'Eskalation aktualisieren', subtitle:'Jeder Schritt wird im Ticket protokolliert und benachrichtigt die andere Seite.',
+    ticketLabel:'Ticket', roleLabel:'Sie aktualisieren als', roleCapa4:'Ebene 4', roleOwner:'Fallverantwortlicher',
+    secMode:'00 — Was möchten Sie erfassen?', modeAvance:'Einen Fortschritt', modeVal:'Lösung vor Ort bestätigen',
+    secStep:'01 — Dieser Schritt', lblDone:'Was wurde gemacht', lblResult:'Ergebnis (was bestätigt oder ausgeschlossen wurde)', lblNext:'Nächster Schritt',
+    secBall:'02 — Wer ist am Zug', lblBall:'Am Zug ist',
+    ballOpts:{capa4:'Ebene 4', dueno:'Fallverantwortlicher (ich)', tercero:'Dritte (F&E / Werk / Lieferant)', validacion:'Lösung vorgeschlagen – Bestätigung'},
+    lblNeed:'Was Sie vom Verantwortlichen brauchen', hintNeed:'Eine konkrete Aktion: messen, Parameter senden, vor Ort gehen, testen…',
+    secVal:'01 — Bestätigung vor Ort', valOk:'Funktioniert vor Ort', valKo:'Funktioniert nicht', lblValComment:'Kommentar',
+    choose:'— Auswählen —', optional:'(optional)', errRequired:'Dieses Feld ist erforderlich.',
+    submit:'Erfassen', sending:'Sende...',
+    successTitle:'Aktualisierung erfasst', successMsg:'Sie steht im Ticket und die andere Seite wurde benachrichtigt. Sie können dieses Fenster schließen.',
+    errorTitle:'Keine Bestätigung', errorMsg:'Prüfen Sie vor dem erneuten Senden, ob die Notiz „[Capa 4 · Actualización]" im Ticket erscheint. Falls nicht, erneut versuchen oder den Administrator kontaktieren.',
+  },
+};
+
+// ── INIT ──
+const params   = new URLSearchParams(window.location.search);
+const ticketId = params.get('ticket_id') || '';
+const role     = params.get('role') === 'capa4' ? 'capa4' : 'dueno';
+const key      = params.get('k') || '';
+const rawLang  = (params.get('lang') || 'es').toLowerCase();
+const lang     = i18n[rawLang] ? rawLang : 'es';
+const t        = Object.assign({}, i18n.es, i18n[lang]);   // textos solo de Capa 4 caen a español
+const webhookUrl = params.get('webhook') || 'https://mpascensores.app.n8n.cloud/webhook/capa4-actualizacion';
+const $ = id => document.getElementById(id);
+
+const setText = (id, txt) => { $(id).textContent = txt; };
+const setLabel = (id, txt, required = true) => {
+  $(id).innerHTML = '';
+  $(id).append(txt);
+  $(id).insertAdjacentHTML('beforeend', required ? ' <span class="req">*</span>' : ' <span class="opt">' + t.optional + '</span>');
+};
+function fillSelect(id, values, labels, placeholder) {
+  const sel = $(id); sel.innerHTML = '';
+  const ph = document.createElement('option'); ph.value = ''; ph.textContent = placeholder || t.choose; sel.appendChild(ph);
+  values.forEach((v, i) => { const o = document.createElement('option'); o.value = v; o.textContent = labels ? labels[i] : v; sel.appendChild(o); });
+}
+
+document.documentElement.lang = lang;
+setText('badge-text', t.badge); setText('main-title', t.title); setText('main-subtitle', t.subtitle);
+setText('ticket-label-text', t.ticketLabel); setText('ticket-display', '#' + (ticketId || '—'));
+setText('role-label-text', t.roleLabel); setText('role-display', role === 'capa4' ? t.roleCapa4 : t.roleOwner);
+setText('sec-mode', t.secMode); setText('lbl-mode-avance', t.modeAvance); setText('lbl-mode-val', t.modeVal);
+setText('sec-step', t.secStep); setLabel('lbl-done', t.lblDone); setLabel('lbl-result', t.lblResult); setLabel('lbl-next', t.lblNext);
+setText('sec-ball', t.secBall); setLabel('lbl-ball', t.lblBall);
+setLabel('lbl-need', t.lblNeed); setText('hint-need', t.hintNeed);
+setLabel('lbl-due', t.lblDue, false); setText('hint-due', t.hintDue);
+setLabel('lbl-state', t.lblState, false); setText('hint-state', t.hintState);
+setText('sec-closing', t.secClosing); setLabel('lbl-solution', t.lblSolution); setText('hint-solution', t.hintSolution);
+setLabel('lbl-soltype', t.lblSolType); setLabel('lbl-category', t.lblCategory); setText('lbl-publish', t.lblPublish);
+setText('sec-val', t.secVal); setText('lbl-val-ok', t.valOk); setText('lbl-val-ko', t.valKo); setLabel('lbl-val-comment', t.lblValComment);
+setText('submit-label', t.submit);
+setText('success-title', t.successTitle); setText('success-msg', t.successMsg);
+setText('error-title', t.errorTitle); setText('error-msg', t.errorMsg);
+
+// Opciones de "Pelota en" según rol: el dueño solo puede devolverla a Capa 4 o quedársela
+const ballKeys = role === 'capa4' ? ['capa4','dueno','tercero','validacion'] : ['capa4','dueno'];
+fillSelect('ball', ballKeys.map(k => BALL[k]), ballKeys.map(k => t.ballOpts[k]));
+fillSelect('problem_state', STATES, null, t.stateKeep);
+fillSelect('solution_type', SOL_TYPES);
+fillSelect('category', CATEGORIES);
+
+if (role === 'capa4') { $('card-mode').classList.add('hidden'); }
+else { document.querySelectorAll('.capa4-only').forEach(el => el.classList.add('hidden')); }
+
+const getMode = () => role === 'capa4' ? 'avance' : document.querySelector('input[name="mode"]:checked').value;
+
+function refresh() {
+  const mode = getMode();
+  const ball = $('ball').value;
+  const isVal = mode === 'validacion';
+  ['card-step','card-ball'].forEach(id => $(id).classList.toggle('hidden', isVal));
+  $('card-validation').classList.toggle('hidden', !isVal);
+  $('card-closing').classList.toggle('hidden', !(role === 'capa4' && ball === BALL.validacion));
+  $('wrap-need').classList.toggle('hidden', !(role === 'capa4' && ball === BALL.dueno));
+  $('submit-label').textContent = t.submit;
+}
+document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', refresh));
+$('ball').addEventListener('change', () => {
+  // Sugerencia: pelota en tercero -> "6. En espera (tercero)" si el estado está en "No cambiar"
+  if (role === 'capa4' && $('ball').value === BALL.tercero && !$('problem_state').value) $('problem_state').value = '6. En espera (tercero)';
+  refresh();
+});
+refresh();
+
+// ── VALIDACIÓN ──
+function req(id, errId) {
+  const el = $(id); const ok = !!el.value.trim();
+  $(errId).textContent = ok ? '' : t.errRequired; $(errId).classList.toggle('visible', !ok); el.classList.toggle('error', !ok);
+  return ok;
+}
+function validate() {
+  let ok = true;
+  if (getMode() === 'validacion') {
+    const v = document.querySelector('input[name="validation"]:checked');
+    $('err-validation').textContent = v ? '' : t.errRequired; $('err-validation').classList.toggle('visible', !v);
+    ok = !!v && ok;
+    ok = req('val_comment', 'err-val-comment') && ok;
+    return ok;
+  }
+  ok = req('done', 'err-done') && ok;
+  ok = req('result', 'err-result') && ok;
+  ok = req('next_step', 'err-next') && ok;
+  ok = req('ball', 'err-ball') && ok;
+  if (!$('wrap-need').classList.contains('hidden')) ok = req('need', 'err-need') && ok;
+  if (!$('card-closing').classList.contains('hidden')) {
+    ok = req('solution', 'err-solution') && ok;
+    ok = req('solution_type', 'err-soltype') && ok;
+    ok = req('category', 'err-category') && ok;
+  }
+  return ok;
+}
+document.querySelectorAll('textarea, select, input').forEach(el => el.addEventListener('input', () => el.classList.remove('error')));
+
+// ── ENVÍO ──
+// POST x-www-form-urlencoded (petición simple, sin preflight). El webhook responde con
+// "Respond to Webhook" y CORS permitido para https://efebejota.github.io, así sabemos si ha ido bien.
+$('update-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!validate()) return;
+  const btn = $('submit-btn');
+  btn.disabled = true; $('submit-label').textContent = t.sending;
+  btn.insertAdjacentHTML('beforeend', '<div class="spinner"></div>');
+  const mode = getMode();
+  const v = document.querySelector('input[name="validation"]:checked');
+  const payload = {
+    k: key, ticket_id: ticketId, role, lang, mode,
+    done: $('done').value.trim(), result: $('result').value.trim(), next_step: $('next_step').value.trim(),
+    ball: mode === 'validacion' ? (v && v.value === 'ok' ? 'c4_pelota_cerrado' : BALL.capa4) : $('ball').value,
+    need: $('wrap-need').classList.contains('hidden') ? '' : $('need').value.trim(),
+    due_date: role === 'capa4' ? $('due_date').value : '',
+    problem_state: role === 'capa4' ? $('problem_state').value : '',
+    solution: $('card-closing').classList.contains('hidden') ? '' : $('solution').value.trim(),
+    solution_type: $('card-closing').classList.contains('hidden') ? '' : $('solution_type').value,
+    category: $('card-closing').classList.contains('hidden') ? '' : $('category').value,
+    publish: !$('card-closing').classList.contains('hidden') && $('publish').checked ? 'true' : 'false',
+    validation: mode === 'validacion' && v ? v.value : '',
+    val_comment: mode === 'validacion' ? $('val_comment').value.trim() : '',
+  };
+  try {
+    const res = await fetch(webhookUrl, { method: 'POST', body: new URLSearchParams(payload) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    $('form-view').style.display = 'none'; $('success-view').classList.add('active');
+  } catch (err) {
+    $('form-view').style.display = 'none'; $('error-view').classList.add('active');
+  }
+});
+</script>
+</body>
+</html>
