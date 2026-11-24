@@ -589,6 +589,7 @@ $('ball').addEventListener('change', () => {
   if (role === 'capa4' && $('ball').value === BALL.tercero && !$('problem_state').value) $('problem_state').value = '6. En espera (tercero)';
   refresh();
 });
+if (role === 'dueno' && params.get('mode') === 'validacion') document.querySelector('input[name="mode"][value="validacion"]').checked = true;
 window.__ready = true;
 refresh();
 
